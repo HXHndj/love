@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>给[她的名字]的一份惊喜</title>
+    <style>
+        /* 基础样式与梦幻渐变背景 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            perspective: 1000px;
+        }
+
+        /* 飘落爱心的动画 */
+        .heart {
+            position: absolute;
+            top: -10vh;
+            color: #ff7eb3;
+            animation: fall linear forwards;
+            z-index: 1;
+            opacity: 0.8;
+            text-shadow: 0 0 10px #ff7eb3;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg) scale(0.5); opacity: 0; }
+        }
+
+        /* 核心内容展示区 */
+        .container {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+            max-width: 85%;
+            width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, box-shadow 0.5s ease, background 0.5s ease;
+            animation: floatIn 1s ease-out;
+        }
+
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            transform: translateZ(30px);
+        }
+
+        /* 初始开启按钮 */
+        #reveal-btn {
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 118, 140, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            transform: translateZ(20px);
+        }
+
+        #reveal-btn:hover {
+            transform: translateZ(20px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 118, 140, 0.6);
+        }
+
+        /* 表白文字区域 */
+        #message-box {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: left;
+            min-height: 120px;
+            letter-spacing: 1px;
+            transform: translateZ(20px);
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: white;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* 后续选项按钮区域 */
+        .options {
+            display: none;
+            justify-content: space-around;
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 1s ease;
+            transform: translateZ(30px);
+        }
+
+        .btn-yes, .btn-no {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-yes {
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,118,140,0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255,118,140,0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(255,118,140,0.8); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255,118,140,0.5); }
+        }
+
+        .btn-no {
+            background: rgba(255,255,255,0.2);
+            color: #ddd;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop>
+        <source src="music.aac" type="audio/aac">
+    </audio>
+
+    <div class="container" id="main-container">
+        <h1 id="title">致我最特别的女孩 ✨</h1>
+        <button id="reveal-btn">点击开启惊喜</button>
+        
+        <div id="message-box">
+            <span id="text-content"></span><span class="cursor">&nbsp;</span>
+        </div>
+
+        <div class="options" id="options-box">
+            <button class="btn-yes" id="btn-yes">我愿意！</button>
+            <button class="btn-no" id="btn-no">还要考虑下</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. 生成飘落的爱心背景
+        let heartInterval;
+        function createHeart(isExplosion = false) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤';
+            
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = Math.random() * 15 + 10 + 'px';
+            
+            if (isExplosion) {
+                heart.style.animationDuration = Math.random() * 2 + 2 + 's';
+                heart.style.color = Math.random() > 0.5 ? '#ff7eb3' : '#ff1361';
+            } else {
+                heart.style.animationDuration = Math.random() * 3 + 4 + 's'; 
+            }
+            
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+        heartInterval = setInterval(() => createHeart(false), 300);
+
+        // 2. 3D 悬浮视差动效
+        const container = document.getElementById('main-container');
+        document.addEventListener('mousemove', (e) => {
+            let xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            container.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+        document.addEventListener('mouseleave', () => {
+            container.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // 3. 打字机特效与内容
+        const btn = document.getElementById('reveal-btn');
+        const messageBox = document.getElementById('message-box');
+        const textContent = document.getElementById('text-content');
+        const optionsBox = document.getElementById('options-box');
+        const bgm = document.getElementById('bgm'); // 获取音频元素
+        
+        const confessionText = "遇见你，是我生命中最美好的事情。你的笑容就像阳光一样照亮了我的世界。我想牵着你的手，走过未来的每一个春夏秋冬。19岁这年，你愿意做我的女朋友吗？";
+        let index = 0;
+
+        function typeWriter() {
+            if (index < confessionText.length) {
+                textContent.innerHTML += confessionText.charAt(index);
+                index++;
+                setTimeout(typeWriter, 120); 
+            } else {
+                optionsBox.style.display = 'flex';
+                setTimeout(() => {
+                    optionsBox.style.opacity = '1';
+                }, 100);
+                container.style.boxShadow = "0 0 30px rgba(255, 126, 179, 0.6)";
+            }
+        }
+
+        // 核心修改：点击按钮时不仅打字，还播放音乐
+        btn.addEventListener('click', () => {
+            bgm.play(); // 播放背景音乐
+            btn.style.display = 'none';
+            messageBox.style.display = 'block';
+            typeWriter();
+        });
+
+        // 4. “调皮”的拒绝按钮
+        const btnNo = document.getElementById('btn-no');
+        function moveNoBtn() {
+            const maxX = window.innerWidth - btnNo.offsetWidth - 20;
+            const maxY = window.innerHeight - btnNo.offsetHeight - 20;
+            const randomX = Math.max(20, Math.random() * maxX);
+            const randomY = Math.max(20, Math.random() * maxY);
+            
+            btnNo.style.position = 'fixed'; 
+            btnNo.style.left = randomX + 'px';
+            btnNo.style.top = randomY + 'px';
+        }
+        btnNo.addEventListener('mouseover', moveNoBtn);
+        btnNo.addEventListener('touchstart', moveNoBtn); 
+
+        // 5. 点击“我愿意”的高光特效
+        const btnYes = document.getElementById('btn-yes');
+        const title = document.getElementById('title');
+
+        btnYes.addEventListener('click', () => {
+            optionsBox.style.display = 'none';
+            messageBox.innerHTML = "<h2 style='color:#ff7eb3; text-align:center; margin-top:30px; animation: floatIn 1s;'>太棒了！我也爱你！❤</h2>";
+            title.innerText = "你是我的女朋友啦！🎉";
+            
+            container.style.background = "rgba(255, 255, 255, 0.15)";
+            container.style.boxShadow = "0 0 50px rgba(255, 126, 179, 1)";
+            
+            clearInterval(heartInterval); 
+            setInterval(() => createHeart(true), 50); 
+        });
+    </script>
+</body>
+</html>
